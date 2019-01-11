@@ -77,14 +77,17 @@ class CombiSource(gf.Source):
     def discretize_basesource(self, store, target=None):
 
         dsources = []
-        t0 = self.subsources[0].time
         for sf in self.subsources:
-            #assert t0 == sf.time
             ds = sf.discretize_basesource(store, target)
             ds.m6s *= sf.get_factor()
+            if num.mean(ds.times) == 0:
+                ds.times = ds.times+1
+                ds.times = ds.times*sf.time
+            else:
+                ds.times = ds.times+sf.time
             dsources.append(ds)
-
         return gf.DiscretizedMTSource.combine(dsources)
+
 
 class ProblemConfig(Object):
     '''
