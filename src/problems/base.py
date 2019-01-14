@@ -83,10 +83,10 @@ class CombiSource(gf.Source):
         for sf in self.subsources:
             ds = sf.discretize_basesource(store, target)
             ds.m6s *= sf.get_factor()
-            dsnew=sf.discretize_basesource(store=store)
             dsources.append(ds)
         dsources[1].times=dsources[1].times-tdiff
         return gf.DiscretizedMTSource.combine(dsources)
+
 
 class ProblemConfig(Object):
     '''
