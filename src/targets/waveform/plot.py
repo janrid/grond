@@ -154,7 +154,6 @@ class CheckWaveformsPlot(PlotConfig):
                 x = problem.get_random_model()
                 sources.append(problem.get_source(x, 0))
                 sources.append(problem.get_source(x, 1))
-                sources.append(problem.get_source(x, 2))
                 results = problem.evaluate(x)
                 results_list.append(results)
 
