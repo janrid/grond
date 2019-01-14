@@ -66,7 +66,7 @@ class CombiSource(gf.Source):
             # lat, lon = center_latlon(subsources)
 
             depth = float(num.mean([p.depth for p in subsources]))
-            t = float(num.mean([p.time for p in subsources]))
+            t = float(num.min([p.time for p in subsources]))
             kwargs.update(time=t, lat=float(lat), lon=float(lon), depth=depth)
 
         gf.Source.__init__(self, subsources=subsources, **kwargs)
@@ -78,12 +78,14 @@ class CombiSource(gf.Source):
 
         dsources = []
         t0 = self.subsources[0].time
+        t1 = self.subsources[1].time
+        tdiff = t0-t1
         for sf in self.subsources:
-            #assert t0 == sf.time
             ds = sf.discretize_basesource(store, target)
             ds.m6s *= sf.get_factor()
+            dsnew=sf.discretize_basesource(store=store)
             dsources.append(ds)
-
+        dsources[1].times=dsources[1].times-tdiff
         return gf.DiscretizedMTSource.combine(dsources)
 
 class ProblemConfig(Object):
