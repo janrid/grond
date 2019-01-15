@@ -134,7 +134,6 @@ class MultiRectangularProblem(Problem):
                 p[k] = float(
                     self.ranges[k+str(i)].make_relative(self.base_source[k], d[k]))
         source = self.base_source.clone(**p)
-        print(source)
         return source
 
     def random_uniform(self, xbounds):
