@@ -178,7 +178,7 @@ class CheckWaveformsPlot(PlotConfig):
                     yield item, fig
 
     def draw_figure(self, sources, target, results):
-        t0_mean = num.mean([s.time for s in sources])
+        t0_mean = num.min([s.time for s in sources])
 
         # distances = [
         #    s.distance_to(target) for s in sources]
