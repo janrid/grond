@@ -86,7 +86,9 @@ class CombiSource(gf.Source):
             ds.m6s *= sf.get_factor()
             dsources.append(ds)
         dsources[1].times = dsources[1].times - tdiff
+
         return gf.DiscretizedMTSource.combine(dsources)
+
 
 class ProblemConfig(Object):
     '''
