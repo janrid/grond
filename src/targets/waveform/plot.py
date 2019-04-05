@@ -1530,7 +1530,7 @@ box, red).
                         axes.set_ylim(-10. * space_factor, 10.)
                     else:
                         axes.set_ylim(
-                            -absmax * 1.33 * space_factor, absmax * 1.33)
+                            -absmax * 3.33 * space_factor, absmax * 3.33)
 
                     itarget, itarget_end = target_index[target]
                     assert itarget_end == itarget + 1
@@ -1558,37 +1558,37 @@ box, red).
 
                     cc_color = mpl_color('aluminium5')
 
-                    if target.misfit_config.domain == 'cc_max_norm':
-                        tref = (result.filtered_obs.tmin +
-                                result.filtered_obs.tmax) * 0.5
+                    #if target.misfit_config.domain == 'cc_max_norm':
+                        #tref = (result.filtered_obs.tmin +
+                                #result.filtered_obs.tmax) * 0.5
 
-                        plot_dtrace(
-                            axes2, dtrace, space, -1., 1.,
-                            fc=light(cc_color, 0.5),
-                            ec=cc_color)
+                        #plot_dtrace(
+                            #axes2, dtrace, space, -1., 1.,
+                            #fc=light(cc_color, 0.5),
+                            #ec=cc_color)
 
-                        plot_dtrace_vline(
-                            axes2, tref, space, color=tap_color_annot)
+                        #plot_dtrace_vline(
+                            #axes2, tref, space, color=tap_color_annot)
 
-                    elif target.misfit_config.domain == 'frequency_domain':
+                    #elif target.misfit_config.domain == 'frequency_domain':
 
-                        asmax = amp_spec_maxs[
-                            target.normalisation_family, target.path]
-                        fmin, fmax = \
-                            target.misfit_config.get_full_frequency_range()
+                        #asmax = amp_spec_maxs[
+                            #target.normalisation_family, target.path]
+                        #fmin, fmax = \
+                            #target.misfit_config.get_full_frequency_range()
 
-                        plot_spectrum(
-                            axes2,
-                            result.spectrum_syn,
-                            result.spectrum_obs,
-                            fmin, fmax,
-                            space, 0., asmax,
-                            syn_color=syn_color,
-                            obs_color=obs_color,
-                            syn_lw=1.0,
-                            obs_lw=0.75,
-                            color_vline=tap_color_annot,
-                            fontsize=fontsize)
+                        #plot_spectrum(
+                            #axes2,
+                            #result.spectrum_syn,
+                            #result.spectrum_obs,
+                            #fmin, fmax,
+                            #space, 0., asmax,
+                            #syn_color=syn_color,
+                            #obs_color=obs_color,
+                            #syn_lw=1.0,
+                            #obs_lw=0.75,
+                            #color_vline=tap_color_annot,
+                            #fontsize=fontsize)
 
                     #else:
                         #plot_dtrace(
