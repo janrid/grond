@@ -78,7 +78,7 @@ class CMTProblem(Problem):
         Parameter('north_shift', 'm', label='Northing', **as_km),
         Parameter('east_shift', 'm', label='Easting', **as_km),
         Parameter('depth', 'm', label='Depth', **as_km),
-        Parameter('magnitude', label='Magnitude'),
+        Parameter('magnitude', '$M_{w}$',  label='Magnitude'),
         Parameter('rmnn', label='$m_{nn} / M_0$'),
         Parameter('rmee', label='$m_{ee} / M_0$'),
         Parameter('rmdd', label='$m_{dd} / M_0$'),

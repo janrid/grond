@@ -120,6 +120,7 @@ corresponding misfit values.
 
             if (impl - 1) >= (nfx * (nfy - 1)) or iplot >= nplots - nfx:
                 axes.set_xlabel('Iteration')
+                axes.locator_params(axis='x', nbins=6)
                 if not (impl - 1) // nfx == 0:
                     axes.get_xaxis().tick_bottom()
             elif (impl - 1) // nfx == 0:
