@@ -443,7 +443,8 @@ displacements derived from best rupture model (red).
             scale = (size/10.) / offset_scale
             
             # add a scale Arrow that represents 1cm displacement in East direction:
-            #m.gmt.psxy(in_rows=[[46, 37.75, 0, scale*0.01]], S="v8p+e", G="black", W="0.75p,black", *m.jxyr)
+            m.gmt.psxy(in_rows=[[47.39, 37.625, 0, scale*0.01]], S="v8p+e", G="black", W="0.75p,black", *m.jxyr)
+            m.gmt.pstext(in_rows=[[47.46, 37.58, "1 cm"]], *m.jxyr)
 
             if vertical:
                 m.add_gnss_campaign(campaign, psxy_style={
