@@ -119,7 +119,9 @@ class RectangularProblem(Problem):
 
     @classmethod
     def get_plot_classes(cls):
+        from . import plot
         plots = super(RectangularProblem, cls).get_plot_classes()
+        plots.extend([plot.SourceLocationMap_Rectangular])
         return plots
 
 
