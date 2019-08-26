@@ -1127,11 +1127,6 @@ Colours give the relative misfits of the source models. Black colours give low
 ''')
 
     def draw_map(self, environ):
-        item = PlotItem(name=self.name,
-                title=u'Source location map',
-                description=u'''
-Map showing the best source outlines (rectangular source) or centroid positions (CMT source).
-''')
 
         history = environ.get_history(subset='harvest')
         optimiser = environ.get_optimiser()
@@ -1242,8 +1237,14 @@ Map showing the best source outlines (rectangular source) or centroid positions 
             #elif checkpar.name=='north_shift':
                 #npar1 = ipar
                 #src_n_pars1 = problem.combined[ipar]
+        ifig = 0
         if isinstance(problem, MultiRectangularProblem):
             for i in range(nsources):
+                item = PlotItem(name='fig_%i' % ifig,
+                                title=u'Source location map',
+                                description=u'''
+                Map showing the best source outlines (rectangular source) or centroid positions (CMT source).
+                ''')
                 ref_pos = num.array([sources[i].lat, sources[i].lon])
                 if i==0:
                     centroids_x = num.array([centroids_xy[l][0] for l in range(len(centroids_xy))])
@@ -1290,7 +1291,7 @@ Map showing the best source outlines (rectangular source) or centroid positions 
                             cmap=plt.get_cmap('Greys'))
 
                 for k in num.arange(nmodels):
-                        alpha_i = (icolor[k] - icolor.min()) / \
+                        alpha_i = (icolor[-(k+1)] - icolor.min()) / \
                                 float(icolor.max() - icolor.min())
                         alpha = int(num.round((alpha_i**3.0)*100)) #alpha^gamma
                         color_i = num.round(num.array(cmap.to_rgba(icolor[k])[0:3])*255)
@@ -1298,22 +1299,28 @@ Map showing the best source outlines (rectangular source) or centroid positions 
                             "/"+str(int(color_i[2]))
                         if i==0:
                             m.gmt.psxy(
-                                in_rows=num.array([outlines_e0[k],
-                                    outlines_n0[k]]).T,
+                                in_rows=num.array([outlines_e0[-(k+1)],
+                                    outlines_n0[-(k+1)]]).T,
                                 L='',
                                 G=color,
                                 t=alpha,
                                 *m.jxyr)
                         elif i==1:
                             m.gmt.psxy(
-                                in_rows=num.array([outlines_e1[k],
-                                    outlines_n1[k]]).T,
+                                in_rows=num.array([outlines_e1[-(k+1)],
+                                    outlines_n1[-(k+1)]]).T,
                                 L='',
                                 G=color,
                                 t=alpha,
                                 *m.jxyr)
+                ifig += 1
                 yield (item, m)
         else:
+            item = PlotItem(name='fig_%i' % ifig,
+                            title=u'Source location map',
+                            description=u'''
+            Map showing the best source outlines (rectangular source) or centroid positions (CMT source).
+            ''')
             ref_pos = num.array([source.lat, source.lon])
             centroids_x = num.array([centroids_xy[i][0] for i in range(len(centroids_xy))])
             centroids_y = num.array([centroids_xy[i][1] for i in range(len(centroids_xy))])
@@ -1361,24 +1368,24 @@ Map showing the best source outlines (rectangular source) or centroid positions 
                 ev_symb = 'c'+str((mag*factor_symbl_size)*8 / gmtpy.cm)+'p'
 
             for k in num.arange(nmodels):
-                    alpha_i = (icolor[k] - icolor.min()) / \
+                    alpha_i = (icolor[-(k+1)] - icolor.min()) / \
                             float(icolor.max() - icolor.min())
                     alpha = int(num.round((alpha_i**3.0)*100)) #alpha^gamma
-                    color_i = num.round(num.array(cmap.to_rgba(icolor[k])[0:3])*255)
+                    color_i = num.round(num.array(cmap.to_rgba(icolor[-(k+1)])[0:3])*255)
                     color = str(int(color_i[0]))+"/"+str(int(color_i[1]))+ \
                         "/"+str(int(color_i[2]))
                     if isinstance(problem, RectangularProblem):
                         m.gmt.psxy(
-                            in_rows=num.array([outlines_e0[k],
-                                outlines_n0[k]]).T,
+                            in_rows=num.array([outlines_e0[-(k+1)],
+                                outlines_n0[-(k+1)]]).T,
                             L='',
                             G=color,
                             t=alpha,
                             *m.jxyr)
                     elif isinstance(problem, CMTProblem):
                         m.gmt.psxy(
-                            in_rows=[[centroids_latlon[1][k],
-                                centroids_latlon[0][k]]],
+                            in_rows=[[centroids_latlon[1][-(k+1)],
+                                centroids_latlon[0][-(k+1)]]],
                             S=ev_symb,
                             G=gmtpy.color('tomato'),
                             W='1p,darkred',
