@@ -117,6 +117,7 @@ class WaveformTargetGroup(TargetGroup):
         help='Stations/components to be excluded according to their STA, '
              'NET.STA, NET.STA.LOC, or NET.STA.LOC.CHA codes.')
     limit = Int.T(optional=True)
+    source = Int.T(optional=True)
     channels = List.T(
         String.T(),
         optional=True,
@@ -144,6 +145,7 @@ class WaveformTargetGroup(TargetGroup):
                     misfit_config=self.misfit_config,
                     manual_weight=self.weight,
                     normalisation_family=self.normalisation_family,
+                    source=self.source,
                     path=self.path or default_path)
 
                 if ds.is_blacklisted(nslc):
@@ -277,6 +279,7 @@ class WaveformMisfitResult(gf.Result, MisfitResult):
 @has_get_plot_classes
 class WaveformMisfitTarget(gf.Target, MisfitTarget):
     flip_norm = Bool.T(default=False)
+    source = Int.T(default=1)
     misfit_config = WaveformMisfitConfig.T()
 
     can_bootstrap_weights = True

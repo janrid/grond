@@ -125,7 +125,7 @@ def plot_dtrace_vline(axes, t, space, **kwargs):
     axes.plot([t, t], [-1.0 - space, -1.0], **kwargs)
 
 
-def layout(source, targets, nxmax, nymax):
+def layout(sources, targets, nxmax, nymax):
     if nxmax == 1 and nymax == 1:
         nx = len(targets)
         ny = 1
@@ -159,8 +159,9 @@ def layout(source, targets, nxmax, nymax):
     data = []
 
     for target in targets:
-        azi = source.azibazi_to(target)[0]
-        dist = source.distance_to(target)
+        ind_s = target.source - 1
+        azi = sources[ind_s].azibazi_to(target)[0]
+        dist = sources[ind_s].distance_to(target)
         x = dist * num.sin(num.deg2rad(azi))
         y = dist * num.cos(num.deg2rad(azi))
         data.append((x, y, dist))
@@ -239,7 +240,7 @@ class CheckWaveformsPlot(PlotConfig):
                 results_list.append(results)
 
         cm.create_group_mpl(self, self.draw_figures(
-            sources, problem.targets, results_list),
+            sources, problem, results_list),
             title=u'Waveform Check',
             section='checks',
             feather_icon='activity',
@@ -258,20 +259,26 @@ taper and synthetic traces are consistent for each random model. The given time
 is relative to the reference event origin time.
 ''')
 
-    def draw_figures(self, sources, targets, results_list):
+    def draw_figures(self, sources, problem, results_list):
+        targets = problem.targets
         results_list = list(zip(*results_list))
+        # results_list has now len(n_random_synthetics) with results for each
+        # target as entries
         for itarget, target, results in zip(
                 range(len(targets)), targets, results_list):
 
             if isinstance(target, WaveformMisfitTarget) and results:
                 item = PlotItem(name='t%i' % itarget)
                 item.attributes['targets'] = [target.string_id()]
-                fig = self.draw_figure(sources, target, results)
+                ind_s = target.source - 1
+                fig = self.draw_figure(problem, sources[ind_s], target, results)
                 if fig is not None:
                     yield item, fig
 
-    def draw_figure(self, sources, target, results):
-        t0_min = num.min([s.time for s in sources])
+    def draw_figure(self, problem, source, target, results):
+        t0_min = problem.base_source.time # use now really reference time
+        t_diff = source.time - t0_min
+        #t0_min = num.min([s.time for s in sources])
 
         # distances = [
         #    s.distance_to(target) for s in sources]
@@ -310,14 +317,14 @@ is relative to the reference event origin time.
         axes.set_xlabel('Time [s]')
         ii = 0
 
-        for source, result in zip(sources, results):
+        for result in results:
             if not isinstance(result, WaveformMisfitResult):
                 continue
 
             if result.tobs_shift != 0.0:
                 t0 = result.tsyn_pick
             else:
-                t0 = t0_min
+                t0 = t0_min - t_diff # correct reference for possible time shift
 
             t = result.filtered_obs.get_xdata()
             ydata = result.filtered_obs.get_ydata() / yabsmax
@@ -482,7 +489,7 @@ traces.''')
         for imodel in range(nmodels):
             model = models[imodel, :]
 
-            source = problem.get_source(model,0)
+            sources = [problem.get_source(model,0), problem.get_source(model,1)]
             results = problem.evaluate(model)
 
             dtraces.append([])
@@ -597,7 +604,7 @@ traces.''')
             targets = cg_to_targets[cg]
 
             frame_to_target, nx, ny, nxx, nyy = layout(
-                source, targets, nxmax, nymax)
+                sources, targets, nxmax, nymax)
 
             figures = {}
             for iy in range(ny):
@@ -626,6 +633,7 @@ traces.''')
                     item, fig = figures[iyy, ixx]
 
                     target = frame_to_target[iy, ix]
+                    ind_s = target.source - 1
 
                     item.attributes['targets'].append(target.string_id())
 
@@ -711,10 +719,11 @@ traces.''')
                                 color=tap_color_annot)
 
                         dur = tmarks[1] - tmarks[0]
+                        t_ref = 2*problem.base_source.time - sources[ind_s].time
                         for tmark, text, ha in [
                                 (tmarks[0],
                                  '$\\,$ ' + meta.str_duration(
-                                    tmarks[0] - source.time),
+                                    tmarks[0] - t_ref),
                                  'left'),
                                 (tmarks[1],
                                  '$\\Delta$ ' + meta.str_duration(
@@ -750,8 +759,8 @@ traces.''')
                         infos.append(target.string_id())
                     else:
                         infos.append('.'.join(x for x in target.codes if x))
-                    dist = source.distance_to(target)
-                    azi = source.azibazi_to(target)[0]
+                    dist = sources[ind_s].distance_to(target)
+                    azi = sources[ind_s].azibazi_to(target)[0]
                     infos.append(meta.str_dist(dist))
                     infos.append(u'%.0f\u00B0' % azi)
                     axes2.annotate(
@@ -884,7 +893,7 @@ box, red).
         w_max = num.nanmax(ws)
         gcm_max = num.nanmax(gcms)
 
-        source = problem.get_source(xbest,0)
+        sources = [problem.get_source(xbest,0), problem.get_source(xbest,1)]
 
         target_to_result = {}
         all_syn_trs = []
@@ -998,7 +1007,7 @@ box, red).
             targets = cg_to_targets[cg]
 
             frame_to_target, nx, ny, nxx, nyy = layout(
-                source, targets, nxmax, nymax)
+                sources, targets, nxmax, nymax)
 
             figures = {}
             for iy in range(ny):
@@ -1027,6 +1036,7 @@ box, red).
                     item, fig = figures[iyy, ixx]
 
                     target = frame_to_target[iy, ix]
+                    ind_s = target.source - 1
 
                     item.attributes['targets'].append(target.string_id())
 
@@ -1145,10 +1155,11 @@ box, red).
                             [tmark, tmark], [-0.9, 0.1], color=tap_color_annot)
 
                     dur = tmarks[1] - tmarks[0]
+                    t_ref = 2*problem.base_source.time - sources[ind_s].time
                     for tmark, text, ha in [
                             (tmarks[0],
                              '$\\,$ ' + meta.str_duration(
-                                 tmarks[0] - source.time),
+                                 tmarks[0] - t_ref),
                              'left'),
                             (tmarks[1],
                              '$\\Delta$ ' + meta.str_duration(dur),
@@ -1206,8 +1217,8 @@ box, red).
                     else:
                         infos.append('.'.join(x for x in target.codes if x))
 
-                    dist = source.distance_to(target)
-                    azi = source.azibazi_to(target)[0]
+                    dist = sources[ind_s].distance_to(target)
+                    azi = sources[ind_s].azibazi_to(target)[0]
                     infos.append(meta.str_dist(dist))
                     infos.append('%.0f\u00B0' % azi)
                     infos.append('%.3g' % ws[itarget])
@@ -1448,7 +1459,7 @@ box, red).
         w_max = num.nanmax(ws)
         gcm_max = num.nanmax(gcms)
 
-        source = problem.get_source(xbest,0)
+        sources = [problem.get_source(xbest,0), problem.get_source(xbest,1)]
 
         target_to_result = {}
         all_syn_trs = []
@@ -1460,7 +1471,7 @@ box, red).
             if not isinstance(result, WaveformMisfitResult):
                 dtraces.extend([None] * target.nmisfits)
                 continue
-            
+
             test=0
             if self.include:
                 if not util.match_nslc(meta.nslcs_to_patterns(self.include), target.string_id()):
@@ -1568,7 +1579,7 @@ box, red).
             targets = cg_to_targets[cg]
 
             frame_to_target, nx, ny, nxx, nyy = layout(
-                source, targets, nxmax, nymax)
+                sources, targets, nxmax, nymax)
 
             figures = {}
             for iy in range(ny):
@@ -1597,6 +1608,7 @@ box, red).
                     item, fig = figures[iyy, ixx]
 
                     target = frame_to_target[iy, ix]
+                    ind_s = target.source - 1
 
                     item.attributes['targets'].append(target.string_id())
 
@@ -1715,10 +1727,11 @@ box, red).
                             [tmark, tmark], [-0.9, 0.1], color=tap_color_annot)
 
                     dur = tmarks[1] - tmarks[0]
+                    t_ref = 2*problem.base_source.time - sources[ind_s].time
                     for tmark, text, ha in [
                             (tmarks[0],
                              '$\\,$ ' + meta.str_duration(
-                                 tmarks[0] - source.time),
+                                 tmarks[0] - t_ref),
                              'left'),
                             (tmarks[1],
                              '$\\Delta$ ' + meta.str_duration(dur),
@@ -1776,8 +1789,8 @@ box, red).
                     else:
                         infos.append('.'.join(x for x in target.codes if x))
 
-                    dist = source.distance_to(target)
-                    azi = source.azibazi_to(target)[0]
+                    dist = sources[ind_s].distance_to(target)
+                    azi = sources[ind_s].azibazi_to(target)[0]
                     infos.append(meta.str_dist(dist))
                     infos.append('%.0f\u00B0' % azi)
                     #infos.append('%.3g' % ws[itarget])
