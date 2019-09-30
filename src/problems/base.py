@@ -79,14 +79,14 @@ class CombiSource(gf.Source):
     def discretize_basesource(self, store, target=None):
 
         dsources = []
-        t0 = self.subsources[0].time
-        t1 = self.subsources[1].time
-        tdiff = t0-t1
+        # t0 = self.subsources[0].time
+        # t1 = self.subsources[1].time
+        # tdiff = t0-t1
         for sf in self.subsources:
             ds = sf.discretize_basesource(store, target)
             ds.m6s *= sf.get_factor()
             dsources.append(ds)
-        dsources[1].times = dsources[1].times - tdiff
+        # dsources[1].times = dsources[1].times - tdiff # would now create doubled time difference
 
         return gf.DiscretizedMTSource.combine(dsources)
 
@@ -603,12 +603,10 @@ class Problem(Object):
                  targets=None, nsources=None):
         patches = []
         nsources = 2 # for testing
-        outlines = []
         if nsources == 2: #if self.nsources:
             for i in range(nsources):
                 source = self.get_source(x, i)
                 patches.append(source)
-                outlines.append(source.outline())
         else:
                 source = self.get_source(x)
 
