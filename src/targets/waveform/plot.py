@@ -239,7 +239,7 @@ class CheckWaveformsPlot(PlotConfig):
                 results_list.append(results)
 
         cm.create_group_mpl(self, self.draw_figures(
-            sources, problem.targets, results_list),
+            sources, problem, results_list),
             title=u'Waveform Check',
             section='checks',
             feather_icon='activity',
@@ -258,7 +258,8 @@ taper and synthetic traces are consistent for each random model. The given time
 is relative to the reference event origin time.
 ''')
 
-    def draw_figures(self, sources, targets, results_list):
+    def draw_figures(self, sources, problem, results_list):
+        targets = problem.targets
         results_list = list(zip(*results_list))
         for itarget, target, results in zip(
                 range(len(targets)), targets, results_list):
@@ -266,12 +267,13 @@ is relative to the reference event origin time.
             if isinstance(target, WaveformMisfitTarget) and results:
                 item = PlotItem(name='t%i' % itarget)
                 item.attributes['targets'] = [target.string_id()]
-                fig = self.draw_figure(sources, target, results)
+                fig = self.draw_figure(problem, sources, target, results)
                 if fig is not None:
                     yield item, fig
 
-    def draw_figure(self, sources, target, results):
-        t0_min = num.min([s.time for s in sources])
+    def draw_figure(self, problem, sources, target, results):
+        t0_min = problem.base_source.time
+        #t0_min = num.min([s.time for s in sources])
 
         # distances = [
         #    s.distance_to(target) for s in sources]
